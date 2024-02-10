@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User          #django user that already exists contained 5 fields knowns
-# Create your models here.
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Profile(models.Model):
     user = models.OneToOneField(User,on_delete =models.CASCADE) #دلوقت هنعمل علاقة عشان نربط المعلومات المضافة مع اللي موجوده ف الداتابيز ف اليوزر 
@@ -21,6 +22,30 @@ class Profile(models.Model):
     def __str__(self) :
         return str(self.user)  #thisfunction to make the any user created in profile apprear as profile admin instead of profile object1 
     
+    
+    #محتاجين نهندل الجزء بتاع لما تكريت يوزر روح كريت بروفايل
+    #ففيه ارتباط في الحدثين 
+    #والارتباط ده ف الكودينج اسمه signal
+    #بمعنى اول ما تكريت يوزر ابعتلي سيجنال عشان اكريت بروفايل
+    #next function related to signals 
+    #سيكونس ماشي ازاي ؟
+    # signup(create user)>signal>call function>create profile(user)
+    
+@receiver(post_save, sender=User)   
+def create_user_profile(sender,instance,created,**kwargs):                 #sender > اللي هيرسلي الاشاره اللي لما دا يتنفذ دا هيتنفذ بعده علطول
+                                                                           #instance >ودي الحاجة اللي لسه متكريتة لسه معمولها انشاء 
+                                                                           #created >دا boolean field هل انت اتكريتت ولا لا
+                                                                           #kwargs >ودي خاصة بالمعلومات الاضافية اللي هتتبعت لليوزر اللي اتكريت دا عشان اعرف استقبلها عادي
+                                                                           #الفانكشن دي بتقبل 3 برامتر بس 
+                                                                           #افرض انت بعت اكتر هيحصل ايرور 
+                                                                           #عشان كدا ال kwargs دا معمول
+                                                                           #بمعنى لو بعت 10 برامتر ع سبيل المثال 
+                                                                           #اول 3 برامتر هيتباصوا لاول تلاتة ف الفانكشن 
+                                                                           #والباقي هتضيفهم عادي
+    if created:
+        Profile.objects.create(
+            user = instance
+        )                                                                       
         
 
 
